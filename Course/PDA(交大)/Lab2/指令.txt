@@ -1,0 +1,56 @@
+scp -r HW2/A131008 2024PDA044@140.113.201.195:/edahome/course/2024PDA/2024PDA044/Desktop //複製資料夾到..
+
+ssh 2024PDA044@140.113.201.195  //連線
+exit //斷開連線
+rm -r folder_name //刪除資料夾
+pwd //查看當前路徑
+
+1.mkdir -p ~/.ssh
+2.nano ~/.ssh/config
+3.//添加以下內容
+Host 140.113.201.195
+    HostKeyAlgorithms +ssh-rsa
+    PubkeyAcceptedAlgorithms +ssh-rsa
+
+./Lab2 [α value] [input.block name] [input.net name] [output name]
+./verifier [α value] [input.block name] [input.net name] [output name]
+
+./Lab2 1 ami33.block ami33.nets ami33.txt
+./verifier 1 ami33.block ami33.nets ami33.txt
+
+./Lab2 0 ami33.block ami33.nets ami33.txt
+./verifier 0 ami33.block ami33.nets ami33.txt
+
+./Lab2 1 ami49.block ami49.nets ami49.txt
+./verifier 1 ami49.block ami49.nets ami49.txt
+
+./Lab2 0 ami49.block ami49.nets ami49.txt
+./verifier 0. ami49.block ami49.nets ami49.txt
+
+./Lab2 1 vda317b.block vda317b.nets vda317b.txt
+./verifier 1 vda317b.block vda317b.nets vda317b.txt
+
+./Lab2 0.1 vda317b.block vda317b.nets vda317b.txt
+./verifier 0.1 vda317b.block vda317b.nets vda317b.txt
+
+./Lab2 0.9 apte.block apte.nets apte.txt
+./verifier 0.9 apte.block apte.nets apte.txt
+
+./Lab2 0.1 apte.block apte.nets apte.txt
+./verifier 0.1 apte.block apte.nets apte.txt
+
+./Lab2 0.9 xerox.block xerox.nets xerox.txt
+./verifier 0.9 xerox.block xerox.nets xerox.txt
+
+./Lab2 0.1 xerox.block xerox.nets xerox.txt
+./verifier 0.1 xerox.block xerox.nets xerox.txt
+
+./Lab2 0.9 hp.block hp.nets hp.txt
+./verifier 0.9 hp.block hp.nets hp.txt
+
+./Lab2 0.1 hp.block hp.nets hp.txt
+./verifier 0.1 hp.block hp.nets hp.txt
+
+
+
+

@@ -1,0 +1,17 @@
+./Lab1 case7.txt out.txt
+g++ -o Lab1 Lab1.cpp
+g++ -std=c++11 -o Lab1 Lab1.cpp
+diff out.txt output7.txt
+
+ssh 2024PDA044@140.113.201.195  //連線
+exit //斷開連線
+rm -r folder_name //刪除資料夾
+scp -r A131008 2024PDA044@140.113.201.195:/edahome/course/2024PDA/2024PDA044/Desktop //複製資料夾到..
+pwd //查看當前路徑
+
+1.mkdir -p ~/.ssh
+2.nano ~/.ssh/config
+3.//添加以下內容
+Host 140.113.201.195
+    HostKeyAlgorithms +ssh-rsa
+    PubkeyAcceptedAlgorithms +ssh-rsa

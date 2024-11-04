@@ -1,0 +1,93 @@
+1156449 
+0.9 ami33
+Your solution
+Area:1253175
+HPWL:102248
+Cost:1.13808e+06
+Height:1085
+Width:1155
+
+0.1 ami33
+Your solution
+Area:1291150
+HPWL:92292
+Cost:212177
+Height:1085
+Width:1190
+
+35445424
+0.9 ami49
+Your solution
+Area:40442640
+HPWL:1316826
+Cost:3.65301e+07
+Height:7602
+Width:5320
+
+0.1 ami49
+Your solution
+Area:40815040
+HPWL:1168825
+Cost:5.13345e+06
+Height:7672
+Width:5320
+
+32991116
+1 vda317b
+Your solution
+Area:40343160
+HPWL:0
+Cost:4.03432e+07
+Height:7053
+Width:5720
+
+46561628
+0.9 apte
+Your solution
+Area:52034220
+HPWL:784666
+Cost:4.69093e+07
+Height:5490
+Width:9478
+
+0.1 apte
+Your solution
+Area:54513888
+HPWL:759026
+Cost:6.13451e+06
+Height:6292
+Width:8664
+
+19350296
+0.9 xerox
+Your solution
+Area:21710430
+HPWL:592844
+Cost:1.95987e+07
+Height:3829
+Width:5670
+
+0.1 xerox
+Your solution
+Area:23825466
+HPWL:544133
+Cost:2.87227e+06
+Height:4998
+Width:4767
+
+8830584
+0.9 hp
+Your solution
+Area:10001880
+HPWL:317176
+Cost:9.03341e+06
+Height:2268
+Width:4410
+
+0.1 hp
+Your solution
+Area:15033200
+HPWL:321060
+Cost:1.79227e+06
+Height:3304
+Width:4550
