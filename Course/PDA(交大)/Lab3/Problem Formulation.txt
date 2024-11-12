@@ -1,0 +1,88 @@
+Problem Formulation:
+Given a legalized placement 𝑃 and a set of cells 𝐶
+ to be inserted into the placement, implement an efficient local legalizer that legalizes the cells in 𝐶 into 𝑃 one by one. 
+The local legalizer should aim to:
+1.Maintain the legality of the placement after each insertion.
+2.Minimize the disturbance to the existing placement.
+3.Ensure efficient execution, particularly for large instances of 𝐶.
+Focus on designing a method that prioritizes local adjustments during the legalization process.
+
+Input Format:
+In this section we will define each syntax for data input. Most of the syntaxes are the floating point numbers and we expect students to take care of the data range within DBL_MAX.
+1.Weight factors of the cost metrixs: 
+𝛼, 𝛽 values are given out as Alpha, Beta, respectively.
+Syntax
+    Alpha <alphaValue>
+    Beta <betaValue>
+Example
+    Alpha 100
+    Beta 200
+2.DieSize describes the dimension of the die, namely the placement area of the design.
+
+Syntax
+    DieSize <lowerLeftX> <lowerLeftY> <upperRightX> <upperRightY>
+
+Example
+    DieSize 0 0 50 30
+3.Cell attribute and legalized coordinate. For fix cell, you are not allowed to move when you try to legalize the placement later.
+
+Syntax
+    <cellName> <lowerLeftX> <lowerLeftY> <width> <height> <FIX/NOTFIX>
+
+Example
+    FF_1_0 8 0 5 10 NOTFIX
+    FF_1_1 14 0 5 10 NOTFIX
+    FF_1_2 14 20 5 10 NOTFIX
+    C4 10 10 5 10 FIX
+4.Placement rows. The given row would start from (<startX>, <startY>) and has a <totalNumOfSites> of cell sites repetitively placed back-to-back in x direction. A cell site is a small rectangle defined in PlacementRows with a dimension of (<siteWidth>, <siteHeight>). The leftmost coordinate of the PlacementRows is <startX> and the rightmmost coordinate of the PlacementRow is <startX + siteWidth x totalNumOfSites>. This syntax defines the placement sites in the design. The height of PlacementRow is standard cell site height, and we will also give the site count, which means that the height of PlacementRow is the height of a cell site and the width of. Every cell should be placed on the PlacementRows, with its lower left corner aligning to the site grid of the PlacementRows.
+Note that to simplify the problem, the siteWidth should always be 1 in this assignment. This means the minimum precision of the cell coordinates should be at least 1 unit in the placement.
+Syntax
+    PlacementRows <startX> <startY> <siteWidth> <siteHeight> <totalNumOfSites>
+
+Example
+    PlacementRows 0 0 1 10 10
+
+inputFile1:
+Example
+    Alpha 100
+    Beta 200
+    DieSize 0 0 50 30
+    FF_1_0 8 0 5 10 NOTFIX
+    FF_1_1 14 0 5 10 NOTFIX
+    FF_1_2 14 20 5 10 NOTFIX
+    C4 10 10 5 10 FIX
+    PlacementRows 0 0 1 10 50
+    PlacementRows 0 10 1 10 50
+    PlacementRows 0 20 1 10 50
+
+inputFile2:
+Syntax
+    Banking_Cell: <list of ff to bank> --> <merged ff name> <x> <y> <w> <h>
+Example
+    Banking_Cell: FF_1_7590 FF_1_9789 --> FF_2_0 724200 890400 9180 4200
+    Banking_Cell: FF_1_19317 FF_1_12413 FF_1_13497 FF_1_13796 --> FF_4_0 1039380 915600 8670 8400
+    Banking_Cell: FF_1_19259 FF_1_6399 FF_1_13066 FF_1_13840 --> FF_4_1 1016940 848400 8670 8400
+    Banking_Cell: FF_1_18802 FF_1_5846 FF_1_14190 FF_1_752 --> FF_4_2 1049070 827400 8670 8400
+    Banking_Cell: FF_1_18607 FF_1_3072 FF_1_13836 FF_1_7578 --> FF_4_3 1014900 806400 8670 8400
+
+Output Format
+For each optimization step, please output the legalized cell for the given merged flip-flop (FF), as well as all the cells that were moved during the legalization of this merged FF.
+
+Syntax
+    <merged ff x> <merged ff y>
+    <num of moved cell>
+    <cel1_name> <cell1_x> <cell1_y>
+Example
+    734500 634200
+    2
+    FF_1_0 725000 623000
+    FF_1_1 742000 695000 
+
+
+
+Banking_Cell: FF_1_19317 FF_1_12413 FF_1_13497 FF_1_13796 --> FF_4_0 1039380 915600 8670 8400
+FF_1_19317 1035300 911400 9690 2100 NOTFIX
+FF_1_12413 1039380 913500 9690 2100 NOTFIX
+FF_1_13497 1030710 915600 9690 2100 NOTFIX
+FF_1_13796 1039380 917700 9690 2100 NOTFIX
+
