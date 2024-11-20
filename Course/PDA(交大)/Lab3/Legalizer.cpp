@@ -1,7 +1,7 @@
-#include "module.h"
-#include "lg.h"
 #include <iostream>
 #include <fstream>
+#include "module.h"
+#include "lg.h"
 
 using namespace std;
 
@@ -35,4 +35,10 @@ int main(int argc, char *argv[])
             return 1;
         }
     }
+
+    Legalizer lg;
+    lg.output_name = argv[3];
+    lg.Read_lg(lg_file);
+    lg.Run_opt(opt_file);
+
 }

@@ -1,0 +1,27 @@
+cd PDA/HW3/Lab3
+time ./Legalizer testcase1_16900.lg testcase1_16900.opt testcase1_16900_post.lg
+time ./Legalizer testcase2_100.lg testcase2_100.opt testcase2_100_post.lg
+time ./Legalizer testcase1_ALL0_5000.lg testcase1_ALL0_5000.opt testcase1_ALL0_5000_post.lg
+time ./Legalizer testcase1_MBFF_LIB_7000.lg testcase1_MBFF_LIB_7000.opt testcase1_MBFF_LIB_7000_post.lg
+
+./Legalizer testcase1_16900.lg test.opt testcase1_16900_post.lg
+./Legalizer testcase2_100.lg test.opt testcase2_100_post.lg
+./Legalizer testcase1_MBFF_LIB_7000.lg test.opt testcase1_MBFF_LIB_7000_post.lg
+
+
+./Evaluator testcase1_16900.lg testcase1_16900.opt testcase1_16900_post.lg
+./Evaluator testcase2_100.lg testcase2_100.opt testcase2_100_post.lg
+./Evaluator testcase1_ALL0_5000.lg testcase1_ALL0_5000.opt testcase1_ALL0_5000_post.lg
+./Evaluator testcase1_MBFF_LIB_7000.lg testcase1_MBFF_LIB_7000.opt testcase1_MBFF_LIB_7000_post.lg
+
+./Evaluator testcase1_16900.lg test.opt testcase1_16900_post.lg
+./Evaluator testcase2_100.lg test.opt testcase2_100_post.lg
+
+
+15300 16800 1284690 1285200
+
+16900
+ALL0_5000
+2_100 1200 row
+MBFF 
+
