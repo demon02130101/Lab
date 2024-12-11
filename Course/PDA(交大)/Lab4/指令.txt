@@ -1,0 +1,8 @@
+./D2DGRter testcase0.gmp testcase0.gcl testcase0.cst testcase0.lg
+./D2DGRter testcase1.gmp testcase1.gcl testcase1.cst testcase1.lg
+./D2DGRter testcase2.gmp testcase2.gcl testcase2.cst testcase2.lg
+
+
+./Evaluator ~/PDA/HW4/Lab4/publicCase/testcase0 testcase0
+./Evaluator ~/PDA/HW4/Lab4/publicCase/testcase1 testcase1
+./Evaluator ~/PDA/HW4/Lab4/publicCase/testcase2 testcase2
