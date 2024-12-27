@@ -280,7 +280,7 @@ void GR::A_star(Bump &s_bump, Bump &t_bump)
 
     s_node->dir = M1;
     s_node->g_cost = 0;
-    s_node->h_cost = 0 + cal_g(t_node, s_node);
+    s_node->h_cost = 0 + cal_h(t_node, s_node);
     s_node->f_cost = s_node->g_cost + s_node->h_cost;
     open_set.push_back(s_node);
 
@@ -428,7 +428,7 @@ Node *GR::select_node(vector<Node *> &open_set, Node *t_node)
     double min_cost = numeric_limits<double>::max();
     for (Node *node : min_set)
     {
-        // dis= abs(t_node->x - node->x) + abs(t_node->y - node->y);
+        // cst = abs(t_node->x - node->x) + abs(t_node->y - node->y);
         cst = node->g_cost;
         if (cst < min_cost)
         {
@@ -548,8 +548,9 @@ double GR::cal_g(Node *cur_node, Node *next_node)
         OV = 0;
     if (OV < 0)
         OV = 0;
-
-    g_cst = pow(alpha, 5) * WL + pow(beta, 5) * OV + pow(gamma, 5) * cell_cst + pow(delta, 5) * via_cst;
+    int k;
+    k = 1;
+    g_cst = pow(alpha, k) * WL + pow(beta, k) * OV + pow(gamma, k) * cell_cst + pow(delta, k) * via_cst;
     return g_cst;
 }
 
@@ -636,7 +637,8 @@ double GR::cal_h(Node *t_node, Node *next_node)
             via_cst = this->via_cost;
         }
     }
-
-    h_cst = pow(alpha, 5) * WL + pow(beta, 5) * total_OV + pow(gamma, 5) * cell_cst + pow(delta, 5) * via_cst;
+    int k;
+    k = 1;
+    h_cst = pow(alpha, k) * WL + pow(beta, k) * total_OV + pow(gamma, k) * cell_cst + pow(delta, k) * via_cst;
     return h_cst;
 }

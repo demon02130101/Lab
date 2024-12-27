@@ -1,8 +1,23 @@
-./D2DGRter testcase0.gmp testcase0.gcl testcase0.cst testcase0.lg
-./D2DGRter testcase1.gmp testcase1.gcl testcase1.cst testcase1.lg
-./D2DGRter testcase2.gmp testcase2.gcl testcase2.cst testcase2.lg
+ssh 2024PDA044@140.113.201.195 
+time ./D2DGRter testcase0.gmp testcase0.gcl testcase0.cst testcase0.lg
+time ./D2DGRter testcase1.gmp testcase1.gcl testcase1.cst testcase1.lg
+time ./D2DGRter testcase2.gmp testcase2.gcl testcase2.cst testcase2.lg
 
 
-./Evaluator ~/PDA/HW4/Lab4/publicCase/testcase0 testcase0
-./Evaluator ~/PDA/HW4/Lab4/publicCase/testcase1 testcase1
-./Evaluator ~/PDA/HW4/Lab4/publicCase/testcase2 testcase2
+./Evaluator ~/PDA/HW4/Lab4 testcase0
+./Evaluator ~/PDA/HW4/Lab4 testcase1
+./Evaluator ~/PDA/HW4/Lab4 testcase2
+
+./Evaluator ~/PDA/HW4/A131008 testcase0
+./Evaluator ~/PDA/HW4/A131008 testcase1
+./Evaluator ~/PDA/HW4/A131008 testcase2
+
+time ./D2DGRter /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase2/testcase2.gmp /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase2/testcase2.gcl /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase2/testcase2.cst /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase2/testcase2.lg
+
+time ./D2DGRter /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase3/testcase3.gmp /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase3/testcase3.gcl /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase3/testcase3.cst /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase3/testcase3.lg
+
+time ./D2DGRter /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase4/testcase4.gmp /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase4/testcase4.gcl /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase4/testcase4.cst /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase4/testcase
+
+./Evaluator /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase2/ testcase2
+./Evaluator /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase3/ testcase3
+./Evaluator /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase4/ testcase4
