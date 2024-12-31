@@ -256,7 +256,11 @@ void GR::write_ans(string output_file)
 void GR::Run()
 {
     for (int i = 0; i < s_bumps.size(); i++)
-        A_star(s_bumps[i], t_bumps[i]);
+    {
+        // cout << "net " << i << endl;
+        //A_star(s_bumps[i], t_bumps[i]);
+        Bruce(s_bumps[i], t_bumps[i]);
+    }
 }
 
 void GR::A_star(Bump &s_bump, Bump &t_bump)
@@ -280,14 +284,17 @@ void GR::A_star(Bump &s_bump, Bump &t_bump)
 
     s_node->dir = M1;
     s_node->g_cost = 0;
+
     s_node->h_cost = 0 + cal_h(t_node, s_node);
     s_node->f_cost = s_node->g_cost + s_node->h_cost;
     open_set.push_back(s_node);
 
     // Step 2 select an open node n from open_set with smallest f(n)
     Node *cur_node;
+    // int count = 0;
     while (!open_set.empty())
     {
+        // cout << "iter " << count++ << endl;
         cur_node = select_node(open_set, t_node);
         if (cur_node->x == t_bump.x && cur_node->y == t_bump.y) // check cur_node == target
         {
@@ -377,6 +384,69 @@ void GR::A_star(Bump &s_bump, Bump &t_bump)
     }
 }
 
+void GR::Bruce(Bump &s_bump, Bump &t_bump)
+{
+    vector<vector<Node>> nodes;
+    init_nodes(Gcells, nodes);
+    Node *s_node, *t_node;
+
+    int s_x, s_y, t_x, t_y;
+    s_y = s_bump.y / grid_h;
+    s_x = s_bump.x / grid_w;
+    t_y = t_bump.y / grid_h;
+    t_x = t_bump.x / grid_w;
+
+    s_node = &nodes[s_y][s_x];
+    t_node = &nodes[t_y][t_x];
+
+    Node *cur_node;
+    Node *next_node;
+    cur_node = s_node;
+    int dis_x, dis_y;
+    dis_x = abs(s_node->id_x - t_node->id_x);
+    dis_y = abs(s_node->id_y - t_node->id_y);
+
+    if (t_node->id_x > s_node->id_x)
+    {
+        for (int i = 0; i < dis_x; i++)
+        {
+            next_node = &nodes[cur_node->id_y][cur_node->id_x + 1];
+            next_node->parent = cur_node;
+            cur_node = next_node;
+        }
+    }
+    else if (t_node->id_x <= s_node->id_x)
+    {
+        for (int i = 0; i < dis_x; i++)
+        {
+            next_node = &nodes[cur_node->id_y][cur_node->id_x - 1];
+            next_node->parent = cur_node;
+            cur_node = next_node;
+        }
+    }
+
+    if (t_node->id_y > s_node->id_y)
+    {
+        for (int i = 0; i < dis_y; i++)
+        {
+            next_node = &nodes[cur_node->id_y + 1][cur_node->id_x];
+            next_node->parent = cur_node;
+            cur_node = next_node;
+        }
+    }
+    else if (t_node->id_y <= s_node->id_y)
+    {
+        for (int i = 0; i < dis_y; i++)
+        {
+            next_node = &nodes[cur_node->id_y - 1][cur_node->id_x];
+            next_node->parent = cur_node;
+            cur_node = next_node;
+        }
+    }
+
+    construct_net(s_bump, cur_node);
+}
+
 void GR::init_nodes(const vector<vector<Gcell>> &Gcells, vector<vector<Node>> &nodes)
 {
     nodes.resize(Gcells.size());
@@ -413,6 +483,7 @@ Node *GR::select_node(vector<Node *> &open_set, Node *t_node)
         if (node->f_cost < min_f_cost)
         {
             min_f_cost = node->f_cost;
+            // sel_node = node;
         }
     }
 
@@ -500,32 +571,32 @@ double GR::cal_g(Node *cur_node, Node *next_node)
     WL = abs(next_node->x - cur_node->x) + abs(next_node->y - cur_node->y);
 
     // cell cost and via cost
-    if (cur_node->dir == M1)
-    {
-        if (cur_node->dir == next_node->dir)
-        {
-            cell_cst = cur_node->M1_cost;
-            via_cst = 0;
-        }
-        else
-        {
-            cell_cst = (cur_node->M1_cost + cur_node->M2_cost) / 2;
-            via_cst = this->via_cost;
-        }
-    }
-    else if (cur_node->dir == M2)
-    {
-        if (cur_node->dir == next_node->dir)
-        {
-            cell_cst = cur_node->M2_cost;
-            via_cst = 0;
-        }
-        else
-        {
-            cell_cst = (cur_node->M1_cost + cur_node->M2_cost) / 2;
-            via_cst = this->via_cost;
-        }
-    }
+    // if (cur_node->dir == M1)
+    // {
+    //     if (cur_node->dir == next_node->dir)
+    //     {
+    //         cell_cst = cur_node->M1_cost;
+    //         // via_cst = 0;
+    //     }
+    //     else
+    //     {
+    //         cell_cst = (cur_node->M1_cost + cur_node->M2_cost) / 2;
+    //         // via_cst = this->via_cost;
+    //     }
+    // }
+    // else if (cur_node->dir == M2)
+    // {
+    //     if (cur_node->dir == next_node->dir)
+    //     {
+    //         cell_cst = cur_node->M2_cost;
+    //         // via_cst = 0;
+    //     }
+    //     else
+    //     {
+    //         cell_cst = (cur_node->M1_cost + cur_node->M2_cost) / 2;
+    //         // via_cst = this->via_cost;
+    //     }
+    // }
 
     // overflow cost
     if (next_node->id_x == cur_node->id_x + 1)
@@ -551,6 +622,7 @@ double GR::cal_g(Node *cur_node, Node *next_node)
     int k;
     k = 1;
     g_cst = pow(alpha, k) * WL + pow(beta, k) * OV + pow(gamma, k) * cell_cst + pow(delta, k) * via_cst;
+    // g_cst = WL;
     return g_cst;
 }
 
@@ -561,84 +633,85 @@ double GR::cal_h(Node *t_node, Node *next_node)
     WL = abs(t_node->x - next_node->x) + abs(t_node->y - next_node->y);
 
     // cell cost and OV cost
-    double M1_csts, M2_csts;
-    double OV;
-    int dis_x, dis_y;
-    dis_x = abs(t_node->id_x - next_node->id_x);
-    dis_y = abs(t_node->id_y - next_node->id_y);
+    // double M1_csts, M2_csts;
+    // double OV;
+    // int dis_x, dis_y;
+    // dis_x = abs(t_node->id_x - next_node->id_x);
+    // dis_y = abs(t_node->id_y - next_node->id_y);
 
-    M1_csts = M2_csts = total_OV = 0;
-    for (int i = 0; i < dis_x; i++)
-    {
-        if (t_node->id_x > next_node->id_x)
-        {
-            M2_csts += Gcells[next_node->id_y][next_node->id_x + i].M2_cost;
-            OV = Gcells[next_node->id_y][next_node->id_x + i].num_left - Gcells[next_node->id_y][next_node->id_x + i].left_cap;
-            if (OV > 0)
-            {
-                total_OV += OV;
-            }
-        }
-        else
-        {
-            M2_csts += Gcells[next_node->id_y][next_node->id_x - i].M2_cost;
-            OV = Gcells[next_node->id_y][next_node->id_x - i].num_left - Gcells[next_node->id_y][next_node->id_x - i].left_cap;
-            if (OV > 0)
-            {
-                total_OV += OV;
-            }
-        }
-    }
+    // M1_csts = M2_csts = total_OV = 0;
+    // for (int i = 0; i < dis_x; i++)
+    // {
+    //     if (t_node->id_x > next_node->id_x)
+    //     {
+    //         // M2_csts += Gcells[next_node->id_y][next_node->id_x + i].M2_cost;
+    //         OV = Gcells[next_node->id_y][next_node->id_x + i].num_left - Gcells[next_node->id_y][next_node->id_x + i].left_cap;
+    //         if (OV > 0)
+    //         {
+    //             total_OV += OV;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         // M2_csts += Gcells[next_node->id_y][next_node->id_x - i].M2_cost;
+    //         OV = Gcells[next_node->id_y][next_node->id_x - i].num_left - Gcells[next_node->id_y][next_node->id_x - i].left_cap;
+    //         if (OV > 0)
+    //         {
+    //             total_OV += OV;
+    //         }
+    //     }
+    // }
 
-    for (int i = 0; i < dis_y; i++)
-    {
-        if (t_node->id_y > next_node->id_y)
-        {
-            M1_csts += Gcells[next_node->id_y + i][next_node->id_x].M1_cost;
-            OV = Gcells[next_node->id_y + i][next_node->id_x].num_bottom - Gcells[next_node->id_y + i][next_node->id_x].bottom_cap;
-            if (OV > 0)
-            {
-                total_OV += OV;
-            }
-        }
+    // for (int i = 0; i < dis_y; i++)
+    // {
+    //     if (t_node->id_y > next_node->id_y)
+    //     {
+    //         // M1_csts += Gcells[next_node->id_y + i][next_node->id_x].M1_cost;
+    //         OV = Gcells[next_node->id_y + i][next_node->id_x].num_bottom - Gcells[next_node->id_y + i][next_node->id_x].bottom_cap;
+    //         if (OV > 0)
+    //         {
+    //             total_OV += OV;
+    //         }
+    //     }
 
-        else
-        {
-            M1_csts += Gcells[next_node->id_y - i][next_node->id_x].M1_cost;
-            OV = Gcells[next_node->id_y - i][next_node->id_x].num_bottom - Gcells[next_node->id_y - i][next_node->id_x].bottom_cap;
-            if (OV > 0)
-            {
-                total_OV += OV;
-            }
-        }
-    }
-    cell_cst = M1_csts + M2_csts;
+    //     else
+    //     {
+    //         // M1_csts += Gcells[next_node->id_y - i][next_node->id_x].M1_cost;
+    //         OV = Gcells[next_node->id_y - i][next_node->id_x].num_bottom - Gcells[next_node->id_y - i][next_node->id_x].bottom_cap;
+    //         if (OV > 0)
+    //         {
+    //             total_OV += OV;
+    //         }
+    //     }
+    // }
+    // cell_cst = M1_csts + M2_csts;
 
     // via cost
-    if (next_node->dir == M1)
-    {
-        if (next_node->x == t_node->x)
-        {
-            via_cst = 0;
-        }
-        else
-        {
-            via_cst = this->via_cost;
-        }
-    }
-    else if (next_node->dir == M2)
-    {
-        if (next_node->y == t_node->y)
-        {
-            via_cst = 0;
-        }
-        else
-        {
-            via_cst = this->via_cost;
-        }
-    }
+    // if (next_node->dir == M1)
+    // {
+    //     if (next_node->x == t_node->x)
+    //     {
+    //         via_cst = 0;
+    //     }
+    //     else
+    //     {
+    //         via_cst = this->via_cost;
+    //     }
+    // }
+    // else if (next_node->dir == M2)
+    // {
+    //     if (next_node->y == t_node->y)
+    //     {
+    //         via_cst = 0;
+    //     }
+    //     else
+    //     {
+    //         via_cst = this->via_cost;
+    //     }
+    // }
     int k;
     k = 1;
     h_cst = pow(alpha, k) * WL + pow(beta, k) * total_OV + pow(gamma, k) * cell_cst + pow(delta, k) * via_cst;
+    h_cst = WL;
     return h_cst;
 }

@@ -37,6 +37,7 @@ public:
     // route
     void Run();
     void A_star(Bump &s_bump, Bump &t_bump);
+    void Bruce(Bump &s_bump, Bump &t_bump);
     void init_nodes(const vector<vector<Gcell>> &Gcells, vector<vector<Node>> &nodes);
     // Node select_node(vector<Node> open_set);
     Node *select_node(vector<Node *> &open_set, Node *t_node);

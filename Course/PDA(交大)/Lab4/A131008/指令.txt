@@ -13,11 +13,12 @@ time ./D2DGRter testcase2.gmp testcase2.gcl testcase2.cst testcase2.lg
 ./Evaluator ~/PDA/HW4/A131008 testcase1
 ./Evaluator ~/PDA/HW4/A131008 testcase2
 
-time ./D2DGRter /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase2/testcase2.gmp /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase2/testcase2.gcl /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase2/testcase2.cst /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase2/testcase2.lg
+time ./D2DGRter publicCase/testcase0/testcase0.gmp publicCase/testcase0/testcase0.gcl publicCase/testcase0/testcase0.cst publicCase/testcase0/testcase0.lg
+time ./D2DGRter publicCase/testcase2/testcase2.gmp publicCase/testcase2/testcase2.gcl publicCase/testcase2/testcase2.cst publicCase/testcase2/testcase2.lg
+time ./D2DGRter publicCase/testcase3/testcase3.gmp publicCase/testcase3/testcase3.gcl publicCase/testcase3/testcase3.cst publicCase/testcase3/testcase3.lg
+time ./D2DGRter publicCase/testcase4/testcase4.gmp publicCase/testcase4/testcase4.gcl publicCase/testcase4/testcase4.cst publicCase/testcase4/testcase4.lg
 
-time ./D2DGRter /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase3/testcase3.gmp /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase3/testcase3.gcl /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase3/testcase3.cst /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase3/testcase3.lg
 
-time ./D2DGRter /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase4/testcase4.gmp /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase4/testcase4.gcl /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase4/testcase4.cst /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase4/testcase
 
 ./Evaluator /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase2/ testcase2
 ./Evaluator /edahome/course/2024PDA/2024PDA044/Desktop/A131008/publicCase/testcase3/ testcase3
