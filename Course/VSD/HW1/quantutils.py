@@ -1,6 +1,7 @@
 from copy import deepcopy
 import torch.nn as nn
 import torch
+import torch.nn.functional as F
 from typing import Tuple
 from typing import List
 import numpy as np
@@ -44,16 +45,8 @@ def quantized_weights(weights: torch.Tensor) -> Tuple[torch.Tensor, float]:
           This value does not need to be an 8-bit integer.
     '''
     # TODO
-    max = torch.max(weights)
-    min = torch.min(weights)
-
-    # decide the range  
-    if torch.abs(max) > torch.abs(min):
-        min = max * -1
-    else:
-        max = min * -1
-    
-    scale = abs(max) / 127
+    max = torch.max(torch.abs(weights))
+    scale = 2 * max / 255
 
     weights = torch.round(weights / scale).clamp(-128, 127)
 
@@ -109,15 +102,10 @@ class NetQuantized(nn.Module):
         '''
 
         # TODO
-        max = torch.max(pixels)
-        min = torch.min(pixels)
-        if torch.abs(max) > torch.abs(min):
-          min = max * -1
-        else:
-          max = min * -1
+        max = torch.max(torch.abs(pixels))
 
-        scale = max / 128
-        s_initial_input = 1 / scale
+        s_I = 2 * max / 255
+        s_initial_input = 1 / s_I
 
         return s_initial_input
 
@@ -139,44 +127,13 @@ class NetQuantized(nn.Module):
         '''
 
         # TODO
-        # 1️⃣ 计算当前层的 `s_o`
-        s_o = s_w * s_initial_input
-    
-        # 2️⃣ 确保 `s_o_prev` 是列表，并更新 `s_o`
-        if isinstance(s_o_prev, torch.Tensor):
-            s_o_prev = s_o_prev.cpu().tolist()
-        elif not isinstance(s_o_prev, list):
-            s_o_prev = [s_o_prev]  # 变成单个元素的列表
+        max = torch.max(torch.abs(activations))
+        s_o = 2 * max / 255
 
-        for prev_scale in s_o_prev:
-            if isinstance(prev_scale, (tuple, list)) and len(prev_scale) == 2:
-                weight_scale, input_scale = prev_scale
-                s_o *= weight_scale * input_scale
-            elif isinstance(prev_scale, (int, float)):  # 兼容浮点数列表
-                s_o *= prev_scale
-            else:
-                raise ValueError(f"Unexpected format in s_o_prev: {s_o_prev}")
-
-        # 3️⃣ 量化输出
-        if isinstance(activations, torch.Tensor):
-            activations = activations.cpu().numpy()  # 转换为 numpy 数组
-
-        activations = np.multiply(activations, s_o)
-    
-        max_val = np.max(activations)
-        min_val = np.min(activations)
-    
-        if np.abs(max_val) > np.abs(min_val):
-            min_val = -max_val
+        if s_o_prev:
+          M = s_w * s_o_prev[-1] / s_o
         else:
-            max_val = -min_val
-
-        # 4️⃣ 计算缩放因子 `scale`
-        scale = max(abs(max_val), 1e-6) / 128  # 避免除零错误
-
-        # 5️⃣ 计算 `M`
-        M = 1 / scale
-
+          M = s_w / (s_o * s_initial_input)
         
         return M, s_o
 
@@ -196,42 +153,54 @@ class NetQuantized(nn.Module):
         #   * torch.clamp
 
         # TODO
+        # scale = round(scale*(2**16))
+        # floor((scale*features) >> 16)
+
         input_scale = self.input_scale
-        conv1_output_scale = self.conv1.output_scale
-        conv2_output_scale = self.conv2.output_scale
-        fc1_output_scale = self.fc1.output_scale
-        fc2_output_scale = self.fc2.output_scale
-        fc3_output_scale = self.fc3.output_scale
+        conv1_output_scale = (self.conv1.output_scale*(2**16)).round()
+        conv3_output_scale = (self.conv3.output_scale*(2**16)).round()
+        conv5_output_scale = (self.conv5.output_scale*(2**16)).round()
+        fc6_output_scale = (self.fc6.output_scale*(2**16)).round()
+        output_scale = (self.output.output_scale*(2**16)).round()
 
-        # input
-        x = (x * input_scale).round()
+ 
+        #input
+        x = torch.floor(input_scale / (1/x).round())
         x = torch.clamp(x, min=-128, max=127)
 
-        # conv1
-        x = self.pool(F.relu(self.conv1(x)))
-        x = (x * conv1_output_scale).round()
-        x = torch.clamp(x, min=-128, max=127)
-        
-        # conv2
-        x = self.pool(F.relu(self.conv2(x)))
-        x = (x * conv2_output_scale).round()
+        # conv1 + maxpool2
+        x = self.conv1(x)
+        x = self.maxpool2(F.relu(x))
+        x = torch.floor((conv1_output_scale * x).to(torch.int) >> 16)
         x = torch.clamp(x, min=-128, max=127)
 
-        x = x.view(-1, 16 * 5 * 5)
-      
-        # fc1
-        x = F.relu(self.fc1(x))
-        x = (x * fc1_output_scale).round()
+        # conv3 + maxpool4
+        #　x = self.conv3(x)
+        x = self.conv3(x.to(torch.float32))
+        x = self.maxpool4(F.relu(x))
+        x = torch.floor((conv3_output_scale * x).to(torch.int) >> 16)
         x = torch.clamp(x, min=-128, max=127)
 
-        # fc2
-        x = F.relu(self.fc2(x))
-        x = (x * fc2_output_scale).round()
+        # conv5
+        # x = self.conv5(x)
+        x = self.conv5(x.to(torch.float32))
+        x = F.relu(x)
+        x = torch.floor((conv5_output_scale * x).to(torch.int) >> 16)
         x = torch.clamp(x, min=-128, max=127)
 
-        # fc3
-        x = self.fc3(x)
-        x = (x * fc3_output_scale).round()
+        # flatten
+        x = torch.flatten(x, 1)
+
+        # fc6
+        # x = self.fc6(x)
+        x = self.fc6(x.to(torch.float32))
+        x = torch.floor((fc6_output_scale * x).to(torch.int) >> 16)
+        x = torch.clamp(x, min=-128, max=127)
+
+        # output
+        x = self.output(x.to(torch.float32))
+        # x = self.output(x)
+        x = torch.floor((output_scale * x).to(torch.int) >> 16)
         x = torch.clamp(x, min=-128, max=127)
 
         return x
@@ -272,10 +241,8 @@ class NetQuantizedWithBias(NetQuantized):
         # The quantization method are similar to quantize output activation
         # --------------------------------------------------------------------
         # s_b : scale_bias
-        s_b = s_w
-        for weight_scale, input_scale  in s_o_prev:
-            s_b *= weight_scale * input_scale 
 
+        s_b = s_w * s_o_prev[-1]
         bias = torch.clamp((bias * s_b).round(), min=-2147483648, max=2147483647)
         
         return bias
@@ -293,5 +260,20 @@ def float_to_fixed_scale(act_scalesDict, weight_scalesDict, outputBias_float):
     outputBias_fixed = []
     
     # TODO
-
+    M_quant = 1.0 / float(act_scalesDict["quant"])
+    scalesDict["quant"] = round(M_quant)
+    layer_names = ["conv1.conv", "conv3.conv", "conv5.conv", "fc6.fc", "output.fc"]
+    
+    for i, layer in enumerate(layer_names):
+        s_Wl = float(weight_scalesDict[layer])   
+        s_Il = float(act_scalesDict[layer])      
+        s_Ol = float(act_scalesDict[layer_names[i + 1]] if i < len(layer_names) - 1 else act_scalesDict["output.fc"])
+        
+        M_l = (s_Wl * s_Il) / s_Ol
+        M_l_fixed = round(M_l * (2 ** 16))
+        scalesDict[layer] = M_l_fixed
+    
+    M_output = scalesDict["output.fc"]
+    outputBias_fixed = np.round(outputBias_float * M_output).astype(int)
+    
     return scalesDict, outputBias_fixed
