@@ -44,7 +44,19 @@ def quantized_weights(weights: torch.Tensor) -> Tuple[torch.Tensor, float]:
           This value does not need to be an 8-bit integer.
     '''
     # TODO
+    max = torch.max(weights)
+    min = torch.min(weights)
+
+    # decide the range  
+    if torch.abs(max) > torch.abs(min):
+        min = max * -1
+    else:
+        max = min * -1
     
+    scale = abs(max) / 127
+
+    weights = torch.round(weights / scale).clamp(-128, 127)
+
     return weights, scale
 
 from typing import List
@@ -97,6 +109,15 @@ class NetQuantized(nn.Module):
         '''
 
         # TODO
+        max = torch.max(pixels)
+        min = torch.min(pixels)
+        if torch.abs(max) > torch.abs(min):
+          min = max * -1
+        else:
+          max = min * -1
+
+        scale = max / 128
+        s_initial_input = 1 / scale
 
         return s_initial_input
 
@@ -116,7 +137,46 @@ class NetQuantized(nn.Module):
         M (float): A scaling factor that the layer output should be multiplied by before being fed into the next layer. This value does not need to be an 8-bit integer.
         s_o (float): The scaling factor of the output matrix of the current layer. This is used to calculate the next layer's output scale.
         '''
+
         # TODO
+        # 1️⃣ 计算当前层的 `s_o`
+        s_o = s_w * s_initial_input
+    
+        # 2️⃣ 确保 `s_o_prev` 是列表，并更新 `s_o`
+        if isinstance(s_o_prev, torch.Tensor):
+            s_o_prev = s_o_prev.cpu().tolist()
+        elif not isinstance(s_o_prev, list):
+            s_o_prev = [s_o_prev]  # 变成单个元素的列表
+
+        for prev_scale in s_o_prev:
+            if isinstance(prev_scale, (tuple, list)) and len(prev_scale) == 2:
+                weight_scale, input_scale = prev_scale
+                s_o *= weight_scale * input_scale
+            elif isinstance(prev_scale, (int, float)):  # 兼容浮点数列表
+                s_o *= prev_scale
+            else:
+                raise ValueError(f"Unexpected format in s_o_prev: {s_o_prev}")
+
+        # 3️⃣ 量化输出
+        if isinstance(activations, torch.Tensor):
+            activations = activations.cpu().numpy()  # 转换为 numpy 数组
+
+        activations = np.multiply(activations, s_o)
+    
+        max_val = np.max(activations)
+        min_val = np.min(activations)
+    
+        if np.abs(max_val) > np.abs(min_val):
+            min_val = -max_val
+        else:
+            max_val = -min_val
+
+        # 4️⃣ 计算缩放因子 `scale`
+        scale = max(abs(max_val), 1e-6) / 128  # 避免除零错误
+
+        # 5️⃣ 计算 `M`
+        M = 1 / scale
+
         
         return M, s_o
 
@@ -125,7 +185,7 @@ class NetQuantized(nn.Module):
         Since input_scale is 128 and all output_scales are less than 1, we should keep input_scale as it is and tranform output_scale to
         round(1/output_scale) to ease the verilog implementaion.
 
-        Also, the normalized input images is a matrix with lots of floating numbers. We can transform x*input_scale to
+        Also, the normalized input images is a matrix with lots of floating numbers. We can tr sform x*input_scale to
         input_scale/round(1/x)
 
         To not implement rounding in verilog, we use floor when doing other calculations with input/output_scale.
@@ -136,6 +196,43 @@ class NetQuantized(nn.Module):
         #   * torch.clamp
 
         # TODO
+        input_scale = self.input_scale
+        conv1_output_scale = self.conv1.output_scale
+        conv2_output_scale = self.conv2.output_scale
+        fc1_output_scale = self.fc1.output_scale
+        fc2_output_scale = self.fc2.output_scale
+        fc3_output_scale = self.fc3.output_scale
+
+        # input
+        x = (x * input_scale).round()
+        x = torch.clamp(x, min=-128, max=127)
+
+        # conv1
+        x = self.pool(F.relu(self.conv1(x)))
+        x = (x * conv1_output_scale).round()
+        x = torch.clamp(x, min=-128, max=127)
+        
+        # conv2
+        x = self.pool(F.relu(self.conv2(x)))
+        x = (x * conv2_output_scale).round()
+        x = torch.clamp(x, min=-128, max=127)
+
+        x = x.view(-1, 16 * 5 * 5)
+      
+        # fc1
+        x = F.relu(self.fc1(x))
+        x = (x * fc1_output_scale).round()
+        x = torch.clamp(x, min=-128, max=127)
+
+        # fc2
+        x = F.relu(self.fc2(x))
+        x = (x * fc2_output_scale).round()
+        x = torch.clamp(x, min=-128, max=127)
+
+        # fc3
+        x = self.fc3(x)
+        x = (x * fc3_output_scale).round()
+        x = torch.clamp(x, min=-128, max=127)
 
         return x
     
@@ -174,7 +271,13 @@ class NetQuantizedWithBias(NetQuantized):
         # --------------------------------------------------------------------
         # The quantization method are similar to quantize output activation
         # --------------------------------------------------------------------
+        # s_b : scale_bias
+        s_b = s_w
+        for weight_scale, input_scale  in s_o_prev:
+            s_b *= weight_scale * input_scale 
 
+        bias = torch.clamp((bias * s_b).round(), min=-2147483648, max=2147483647)
+        
         return bias
     
 
