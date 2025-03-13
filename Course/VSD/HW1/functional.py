@@ -127,8 +127,9 @@ def Conv2d(psum_range, x, weights, out_channels, kernel_size=5, stride=1, bias=F
 
 def ActQuant(x, scale, shiftbits=16):
     # TODO
-    x = np.round(x * scale).astype(np.int32)  # Cast to integer type before shifting
-    x = x >> shiftbits  # Right shift
+    x = np.round(x * scale).astype(np.int32)  
+    x = x >> shiftbits 
+    x = np.clip(x, -128, 127)
     return x
 
 

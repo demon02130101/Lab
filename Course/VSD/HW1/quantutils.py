@@ -259,21 +259,32 @@ def float_to_fixed_scale(act_scalesDict, weight_scalesDict, outputBias_float):
     }
     outputBias_fixed = []
     
-    # TODO
-    M_quant = 1.0 / float(act_scalesDict["quant"])
+    # Calculate M_quant for the initial input
+    M_quant = 1.0 / np.array(act_scalesDict["quant"]).item()
     scalesDict["quant"] = round(M_quant)
+    
+    # List of layer names
     layer_names = ["conv1.conv", "conv3.conv", "conv5.conv", "fc6.fc", "output.fc"]
     
+
     for i, layer in enumerate(layer_names):
-        s_Wl = float(weight_scalesDict[layer])   
-        s_Il = float(act_scalesDict[layer])      
-        s_Ol = float(act_scalesDict[layer_names[i + 1]] if i < len(layer_names) - 1 else act_scalesDict["output.fc"])
+        s_Wl = np.array(weight_scalesDict[layer]).item() 
+        s_Ol = np.array(act_scalesDict[layer]).item()     
+        s_Il = np.array(act_scalesDict[layer_names[i-1]]).item() if i > 0 else np.array(act_scalesDict["quant"]).item()  
         
+        # Calculate M_l
         M_l = (s_Wl * s_Il) / s_Ol
-        M_l_fixed = round(M_l * (2 ** 16))
+        M_l_fixed = round(M_l * (2 ** 16))  
         scalesDict[layer] = M_l_fixed
+
+        if layer == "output.fc":
+            M_output = M_l
     
-    M_output = scalesDict["output.fc"]
-    outputBias_fixed = np.round(outputBias_float * M_output).astype(int)
+    # Adjust outputBias to ensure it remains unchanged when using M_output for requantization
+    s_O_output = np.array(act_scalesDict["output.fc"]).item() 
+    # M_output = scalesDict["output.fc"] / (2**16)
+    
+    # Handle 2D outputBias_float array
+    outputBias_fixed = [[round(float(bias) / (s_O_output * M_output)) for bias in row] for row in outputBias_float]
     
     return scalesDict, outputBias_fixed
