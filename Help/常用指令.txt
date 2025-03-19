@@ -1,0 +1,16 @@
+ssh 2024PDA044@140.113.201.195  //連線
+ssh fpga-113062575@maklab.cs.nthu.edu.tw -p 10022
+
+exit //斷開連線
+rm -r folder_name //刪除資料夾
+scp -r A131008 2024PDA044@140.113.201.195:/edahome/course/2024PDA/2024PDA044/Desktop //複製資料夾到..
+scp -P 10022 -r Lab1 fpga-113062575@maklab.cs.nthu.edu.tw:/home/fpga24/fpga-113062575
+
+pwd //查看當前路徑
+
+1.mkdir -p ~/.ssh
+2.nano ~/.ssh/config
+3.//添加以下內容
+Host 140.113.201.195
+    HostKeyAlgorithms +ssh-rsa
+    PubkeyAcceptedAlgorithms +ssh-rsa
